@@ -5,6 +5,9 @@ const progress = document.querySelector('#progress')
 
 content.addEventListener('click', openCard)
 backdrop.addEventListener('click', closeModal)
+modal.addEventListener('change', toggleTech)
+
+const APP_TITLE = document.title
 
 const technologies = [
     {
@@ -39,7 +42,38 @@ const technologies = [
     }
 ]
 
-function openCard(){
+function openCard(event){
+    const data = event.target.dataset
+    const tech = technologies.find(t => t.type === data.type)
+    if (!tech) return
+
+    openModal(toModal(tech), tech.title) 
+}
+
+function toModal(tech){
+    const checked = tech.done ? 'checked' : ''
+    return `
+        <h2>${tech.title}</h2>
+        <p>${tech.description}</p>
+        <hr>
+        <div>
+            <input type="checkbox" id="done" ${checked} data-type="${tech.type}" >
+            <label for="done">Выучил</label>
+        </div>
+    `
+}
+
+function toggleTech(event){
+    const type = (event.target.dataset.type);
+    const tech = technologies.find(t => t.type === type)
+    tech.done = event.target.checked
+
+    init()
+}
+
+function openModal(html, title = APP_TITLE){
+    document.title = `${title} | ${APP_TITLE}`;
+    modal.innerHTML = html;
     modal.classList.add('open')
 }
 
@@ -67,26 +101,40 @@ function renderCards() {
 
 function renderProgress(){
     const percent = computeProgressPercent()
-    console.log(percent)
+ 
+    let background
+
+    if(percent <= 30){
+        background = '#E75A5A';
+    } else if(percent > 30 && percent < 70){
+        background = '#F99415';
+    } else{
+        background = '#73BA3C';
+    }
+
+    progress.style.background = background;
+    progress.style.width = percent + '%';
+    progress.textContent = percent ? percent + '%' : ''
 }
 
 function computeProgressPercent(){
+    if(technologies.length === 0){
+        return 0
+    }
+
     let doneCount = 0;
     for (let i = 0;i < technologies.length;i++){
         if (technologies[i].done) doneCount++
     }
 
-    return (100  * doneCount) /technologies.length
+    return Math.round((100  * doneCount) / technologies.length);
 }
 
 function toCard(tech){
-    let doneClass = ''
-    if(tech.done){
-        doneClass = 'done';
-    } 
+    const doneClass = tech.done ? 'done' : ''
     return `
-        <div class="card ${doneClass}">
-            <h3>${tech.title}</h3>
+        <div class="card ${doneClass}" data-type="${tech.type}">
+            <h3 data-type="${tech.type}" >${tech.title}</h3>
         </div>
         `
 }

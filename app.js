@@ -1,6 +1,7 @@
 const modal = document.querySelector('#modal')
 const content = document.querySelector('#content')
 const backdrop = document.querySelector('#backdrop')
+const progress = document.querySelector('#progress')
 
 content.addEventListener('click', openCard)
 backdrop.addEventListener('click', closeModal)
@@ -47,25 +48,42 @@ function closeModal(){
 }
 
 function init(){
+    renderCards()
+    renderProgress()
+}
+
+function renderCards() {
     if(technologies.length === 0){
-        content.innerHTML = '<p class="empty">Технологий пока нет</p>'
-    } else{
-        let html = ''
-        for (let i = 0 ; i < technologies.length; i++){
-        const tech = technologies[i]
-        html += toCard(tech)
-            }
-        content.innerHTML = html
+            content.innerHTML = '<p class="empty">Технологий пока нет</p>'
+        } else{
+            let html = ''
+            for (let i = 0 ; i < technologies.length; i++){
+            const tech = technologies[i]
+            html += toCard(tech)
+                }
+            content.innerHTML = html
+        }
+}
+
+function renderProgress(){
+    const percent = computeProgressPercent()
+    console.log(percent)
+}
+
+function computeProgressPercent(){
+    let doneCount = 0;
+    for (let i = 0;i < technologies.length;i++){
+        if (technologies[i].done) doneCount++
     }
+
+    return (100  * doneCount) /technologies.length
 }
 
 function toCard(tech){
     let doneClass = ''
-
     if(tech.done){
         doneClass = 'done';
     } 
-
     return `
         <div class="card ${doneClass}">
             <h3>${tech.title}</h3>
